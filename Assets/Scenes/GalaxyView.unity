@@ -493,12 +493,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1677525284}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0fe0cf52a88a3f44e801aa787ee1abbe, type: 3}
+  m_Script: {fileID: 11500000, guid: e6f9c2749a389804eb857c089d74ea46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  N: 45
-  maxConnectionDistance: 100
-  systemSprite: {fileID: -2413806693520163455, guid: 9e5db598e255b6748aa3480657ef725f, type: 3}
+  N: 30
+  maxConnectionDistance: 125
+  systemSprite: {fileID: -2413806693520163455, guid: 09b4f19467f3121438c3cfbcb07392b4, type: 3}
 --- !u!1 &2106458952
 GameObject:
   m_ObjectHideFlags: 0
@@ -525,11 +525,63 @@ MonoBehaviour:
   m_GameObject: {fileID: 2106458952}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6504d628a00c1ef44bebdcb175793cf7, type: 3}
+  m_Script: {fileID: 11500000, guid: 7e3aabddd0d889c44b93b064c678cc68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  StarSystems: []
-  CelestialObjects: []
+  Galaxy:
+    StarSystems: []
+  StarSystemNames:
+  - Ahnar
+  - Zubana
+  - Komle
+  - Usta
+  - Zyb
+  - Sama
+  - Alhim
+  - Falha
+  - Zamok
+  - Korolis Ray
+  - FR-9097b
+  - Vovio
+  - Ovhil
+  - Cassio
+  - Urgarius
+  - Irel
+  - Daryus
+  - Noxus
+  - Demyr
+  - Ionia
+  - Demacia
+  - Lambda Paradisus
+  - Chi Caelum
+  - Meritum
+  - Harena
+  - Hio
+  - Urs
+  - Gav
+  - 8970987c
+  - Ymir
+  - Hildr
+  - Signy
+  - Siv
+  - Skadi
+  - Nanna
+  - Papur
+  - Atla
+  - Eir
+  - Freya
+  - Saga
+  - Skul
+  - Var
+  - Bol
+  - Flot
+  - Duble
+  - Snotra
+  - Yggdrasil
+  - Eostre
+  - Tyr
+  - Yngvi
+  - Ull
 --- !u!4 &2106458954
 Transform:
   m_ObjectHideFlags: 0
