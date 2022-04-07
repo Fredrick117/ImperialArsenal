@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +7,7 @@ using UnityEngine.UI;
 public class SystemGenerator : MonoBehaviour
 {
     // Number of systems to generate
-    [SerializeField] private int N = 21;
+    [SerializeField] private static int N = 21;
 
     // Maximum distance between systems
     [SerializeField] private float maxConnectionDistance = 100f;
@@ -25,9 +24,14 @@ public class SystemGenerator : MonoBehaviour
 
     private List<int> perfectSquares = new List<int> { 1, 4, 9, 25, 36, 49, 64, 81, 100 };
 
-    private void Start()
+    int cellsPerRow;
+    float rowWidth, cellSize;
+
+    private void Awake()
     {
         mapContainer = gameObject.GetComponent<RectTransform>();
+
+        
 
         V = new List<GameObject>();
 
@@ -36,21 +40,80 @@ public class SystemGenerator : MonoBehaviour
             N = GetNextLargestInt(N, perfectSquares);
         }
 
-        int cellsPerRow = (int)Mathf.Sqrt(N);
-        float rowWidth = mapContainer.rect.width;
-        float cellSize = rowWidth / cellsPerRow;
+        cellsPerRow = (int)Mathf.Sqrt(N);
+        rowWidth = mapContainer.rect.width;
+        cellSize = rowWidth / cellsPerRow;
 
         for (int i = 0; i < cellsPerRow; i++)
         {
             for (int j = 0; j < cellsPerRow; j++)
             {
-                CreateSpawnArea(rowWidth, cellSize, cellsPerRow, i, j);
+                CreateSpawnArea(cellSize, i, j);
             }
         }
+    }
 
-        PopulateCells(cellSize);
-        CreateAdjacencyMatrix();
-        ConnectSystems();
+    private void Start()
+    {
+        
+
+        //int cellsPerRow = (int)Mathf.Sqrt(N);
+        //float rowWidth = mapContainer.rect.width;
+        //float cellSize = rowWidth / cellsPerRow;
+
+        
+
+        //PopulateCells(cellSize);
+        //CreateAdjacencyMatrix();
+        //ConnectSystems();
+    }
+
+    public void GenerateSystems()
+    {
+        // 1) initialize blank list of star systems
+        List<StarSystem> systemList = new List<StarSystem>();
+
+        GameObject[] spawnAreaList = GameObject.FindGameObjectsWithTag("SpawnArea");
+
+        // 2) randomly generate N star systems
+        for (int i = 0; i < N; i++)
+        {
+            int numObjects = Random.Range(1, 14);
+
+            Star s = new Star(0, 0, Color.yellow);
+
+            List<Object> objects = new List<Object>();
+
+            objects.Add(s);
+
+            // 3) randomly generate celestial objects, place them in a list
+            for (int j = 0; j < numObjects - 1; j++)
+            {
+                objects.Add(new Planet(RandomEnumValue<PlanetType>(), Random.Range(1, 20), 0, 0));
+            }
+
+            RectTransform r = spawnAreaList[i].GetComponent<RectTransform>();
+            float xMin = r.anchoredPosition.x - (cellSize / 2);
+            float xMax = r.anchoredPosition.x + (cellSize / 2);
+            float yMin = r.anchoredPosition.y - (cellSize / 2);
+            float yMax = r.anchoredPosition.y + (cellSize / 2);
+
+            StarSystem ss = new StarSystem(
+                RandomEnumValue<SystemType>(),
+                Random.Range(xMin, xMax),
+                Random.Range(yMin, yMax),
+                objects
+            );
+
+            RenderStarSystem(new Vector2(ss.Xlocation, ss.Ylocation));
+
+            systemList.Add(ss);
+
+        }
+
+        // 4) add system list to galaxy object
+
+        GameManager.Instance.Galaxy.StarSystems = systemList;
     }
 
     public void PopulateCells(float cellSize)
@@ -66,11 +129,11 @@ public class SystemGenerator : MonoBehaviour
             float yMin = r.anchoredPosition.y - (cellSize / 2);
             float yMax = r.anchoredPosition.y + (cellSize / 2);
 
-            V.Add(CreateSystem(new Vector2(UnityEngine.Random.Range(xMin, xMax), UnityEngine.Random.Range(yMin, yMax))));
+            //V.Add(CreateSystem(new Vector2(Random.Range(xMin, xMax), Random.Range(yMin, yMax))));
         }
     }
 
-    private GameObject CreateSystem(Vector2 position)
+    private GameObject RenderStarSystem(Vector2 position)
     {
         GameObject gameObject = new GameObject("System", typeof(Image));
         gameObject.transform.SetParent(mapContainer, false);
@@ -81,22 +144,15 @@ public class SystemGenerator : MonoBehaviour
         rect.anchorMax = new Vector2(0, 0);
         rect.sizeDelta = new Vector2(11, 11);
 
-        StarSystem s = new StarSystem();
-        s.xLocation = position.x;
-        s.yLocation = position.y;
-        s.CelestialObjects = new List<Object>();
-
-        GameManager.Instance.AddSystem(s);
-
         return gameObject;
     }
 
-    private void CreateSpawnArea(float rowWidth, float cellSize, int cellsPerRow, int i, int j)
+    private void CreateSpawnArea(float cellSize, int i, int j)
     {
         GameObject gameObject = new GameObject("SpawnArea" + ((i + j) + 1), typeof(Image));
         gameObject.tag = "SpawnArea";
         gameObject.transform.SetParent(mapContainer, false);
-        gameObject.GetComponent<Image>().color = new Color(255, 0, 0, 0.5f);
+        gameObject.GetComponent<Image>().color = new Color(0, 0, 0, 0.5f);
         RectTransform rect = gameObject.GetComponent<RectTransform>();
         rect.anchorMin = new Vector2(0, 0);
         rect.anchorMax = new Vector2(0, 0);
@@ -159,28 +215,28 @@ public class SystemGenerator : MonoBehaviour
         return num;
     }
 
-    private void PopulateSystem(List<Object> objList)
-    {
-        int numPlanets = UnityEngine.Random.Range(0, 15);
+    //private void PopulateSystem(List<Object> objList)
+    //{
+    //    int numPlanets = Random.Range(0, 15);
 
-        for (int i = 0; i < numPlanets; i++)
-        {
-            ObjType obj = RandomEnumValue<ObjType>();
+    //    for (int i = 0; i < numPlanets; i++)
+    //    {
+    //        ObjType obj = RandomEnumValue<ObjType>();
 
-            if (obj == ObjType.HabitablePlanet)
-            {
-                Planet p = new Planet();
-            }
-            else if (obj == ObjType.Star)
-            {
+    //        if (obj == ObjType.HabitablePlanet)
+    //        {
+    //            Planet p = new Planet(RandomEnumValue<PlanetType>, );
+    //        }
+    //        else if (obj == ObjType.Star)
+    //        {
 
-            }
-        }
-    }
+    //        }
+    //    }
+    //}
 
     private T RandomEnumValue<T>()
     {
-        var vals = Enum.GetValues(typeof(T));
-        return (T)vals.GetValue(UnityEngine.Random.Range(0, vals.Length - 1));
+        var vals = System.Enum.GetValues(typeof(T));
+        return (T)vals.GetValue(Random.Range(0, vals.Length - 1));
     }
 }

@@ -1,11 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Xml.Linq;
-using System.Xml;
-using System.Xml.Serialization;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 
 public class GameManager : MonoBehaviour
 {
@@ -109,6 +104,8 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         Galaxy = new Galaxy();
+
+        GameObject.FindGameObjectWithTag("SystemGenerator").gameObject.GetComponent<SystemGenerator>().GenerateSystems();
     }
 
     public void AddSystem(StarSystem system)
@@ -119,7 +116,7 @@ public class GameManager : MonoBehaviour
     public void AddPlanet(StarSystem system, Object obj)
     {
         // Todo: refactor
-        Galaxy.StarSystems[Galaxy.StarSystems.IndexOf(system)].CelestialObjects.Add(obj);
+        Galaxy.StarSystems[Galaxy.StarSystems.IndexOf(system)].Objects.Add(obj);
     }
 
     /// <summary>
