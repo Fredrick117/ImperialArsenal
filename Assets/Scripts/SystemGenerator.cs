@@ -55,13 +55,9 @@ public class SystemGenerator : MonoBehaviour
 
     private void Start()
     {
-        
-
         //int cellsPerRow = (int)Mathf.Sqrt(N);
         //float rowWidth = mapContainer.rect.width;
         //float cellSize = rowWidth / cellsPerRow;
-
-        
 
         //PopulateCells(cellSize);
         //CreateAdjacencyMatrix();
@@ -70,27 +66,22 @@ public class SystemGenerator : MonoBehaviour
 
     public void GenerateSystems()
     {
-        // 1) initialize blank list of star systems
         List<StarSystem> systemList = new List<StarSystem>();
 
         GameObject[] spawnAreaList = GameObject.FindGameObjectsWithTag("SpawnArea");
 
-        // 2) randomly generate N star systems
         for (int i = 0; i < N; i++)
         {
             int numObjects = Random.Range(1, 14);
 
-            Star s = new Star(0, 0, Color.yellow);
+            // DANGER: what if names dictionary is smaller than N?
+            string starName = StarSystemNames[i];
+
+            Star s = new Star(starName, 0, 0, Color.yellow);
 
             List<Object> objects = new List<Object>();
 
             objects.Add(s);
-
-            // 3) randomly generate celestial objects, place them in a list
-            for (int j = 0; j < numObjects - 1; j++)
-            {
-                objects.Add(new Planet(RandomEnumValue<PlanetType>(), Random.Range(1, 20), 0, 0));
-            }
 
             RectTransform r = spawnAreaList[i].GetComponent<RectTransform>();
             float xMin = r.anchoredPosition.x - (cellSize / 2);
@@ -99,16 +90,29 @@ public class SystemGenerator : MonoBehaviour
             float yMax = r.anchoredPosition.y + (cellSize / 2);
 
             StarSystem ss = new StarSystem(
+                starName,
                 RandomEnumValue<SystemType>(),
                 Random.Range(xMin, xMax),
                 Random.Range(yMin, yMax),
+                // TODO: separate star and planets
                 objects
             );
+
+            for (int j = 0; j < numObjects - 1; j++)
+            {
+                objects.Add(new Planet(starName + " " + ToRomanNumerals(j + 2), RandomEnumValue<PlanetType>(), Random.Range(1, 20), 0, 0));
+            }
+
+            //Debug.Log("Star system " + i + " name: " + ss.Name);
+            //Debug.Log("Star system " + i + " type: " + ss.Type);
+            //foreach (Object o in ss.Objects)
+            //{
+            //    Debug.Log("Planet name: " + o.Name);
+            //}
 
             RenderStarSystem(new Vector2(ss.Xlocation, ss.Ylocation));
 
             systemList.Add(ss);
-
         }
 
         // 4) add system list to galaxy object
@@ -239,4 +243,108 @@ public class SystemGenerator : MonoBehaviour
         var vals = System.Enum.GetValues(typeof(T));
         return (T)vals.GetValue(Random.Range(0, vals.Length - 1));
     }
+
+    private string ToRomanNumerals(int num)
+    {
+        // TODO: add more
+        switch (num)
+        {
+            case 1:
+                return "I";
+            case 2:
+                return "II";
+            case 3:
+                return "III";
+            case 4:
+                return "IV";
+            case 5:
+                return "V";
+            case 6:
+                return "VI";
+            case 7:
+                return "VII";
+            case 8:
+                return "VIII";
+            case 9:
+                return "IX";
+            case 10:
+                return "X";
+            case 11:
+                return "XI";
+            case 12:
+                return "XII";
+            case 13:
+                return "XIII";
+            case 14:
+                return "XIV";
+            case 15:
+                return "XV";
+            default:
+                return "";
+        }
+    }
+
+    // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_modern_algorithm
+    private static void ShuffleArray<T>(T[] array)
+    {
+        for (int i = 0; i < array.Length - 2; i++)
+        {
+            int j = Random.Range(i, array.Length - 1);
+            array[i] = array[j];
+        }
+    }
+
+    public string[] StarSystemNames = new string[] {
+        "Ahnar",
+        "Zubana",
+        "Komle",
+        "Usta",
+        "Zyb",
+        "Sama",
+        "Alhim",
+        "Falha",
+        "Zamok",
+        "Korolis Ray",
+        "FR-9097b",
+        "Vovio",
+        "Ovhil",
+        "Cassio",
+        "Urgarius",
+        "Irel",
+        "Daryus",
+        "Noxus",
+        "Demyr",
+        "Ionia",
+        "Demacia",
+        "Lambda Paradisus",
+        "Chi Caelum",
+        "Meritum",
+        "Harena",
+        "Hio",
+        "Urs",
+        "Gav",
+        "8970987c",
+        "Ymir",
+        "Hildr",
+        "Signy",
+        "Siv",
+        "Skadi",
+        "Nanna",
+        "Papur",
+        "Atla",
+        "Eir",
+        "Freya",
+        "Saga",
+        "Skul",
+        "Var",
+        "Bol",
+        "Flot",
+        "Duble",
+        "Snotra",
+        "Yggdrasil",
+        "Eostre",
+        "Tyr",
+        "Yngvi",
+        "Ull",
+    };
 }

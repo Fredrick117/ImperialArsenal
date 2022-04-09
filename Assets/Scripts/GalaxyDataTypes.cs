@@ -61,13 +61,15 @@ public class Galaxy
 
 public class StarSystem
 {
-    public SystemType Type          { get; set; }
+    public string Name             { get; set; }
+    public SystemType Type         { get; set; }
     public float Xlocation         { get; set; }
     public float Ylocation         { get; set; }
     public List<Object> Objects    { get; set; }
 
-    public StarSystem(SystemType _type, float _xLocation, float _yLocation, List<Object> _objects) 
+    public StarSystem(string _name, SystemType _type, float _xLocation, float _yLocation, List<Object> _objects) 
     {
+        Name = _name;
         Type = _type;
         Xlocation = _xLocation;
         Ylocation = _yLocation;
@@ -82,20 +84,19 @@ public class StarSystem
 
 public class Object
 {
-    protected float Xlocation { get; set; }
-    protected float Ylocation { get; set; }
+    public string Name { get; set; }
+    public float Xlocation { get; set; }
+    public float Ylocation { get; set; }
 }
 
 public class Planet : Object
 {
-    protected PlanetType PlanetType     { get; set; }
-    //protected bool IsInhabited          { get; set; }
-    //protected List<Species> SpeciesList { get; set; }
-    //protected int TotalPopulation       { get; set; }
-    protected float DistanceFromStar    { get; set; }
+    public PlanetType PlanetType     { get; set; }
+    public float DistanceFromStar    { get; set; }
 
-    public Planet(PlanetType _type/*, bool _inhabited, List<Species> _list, int _population*/, float _distanceFromStar, float _Xlocation, float _Ylocation)
+    public Planet(string _name, PlanetType _type, float _distanceFromStar, float _Xlocation, float _Ylocation)
     {
+        Name = _name;
         PlanetType = _type;
         //this.IsInhabited = _inhabited;
         //this.TotalPopulation = _population;
@@ -108,10 +109,11 @@ public class Planet : Object
 
 public class Star : Object
 {
-    protected Color Color { get; set; }
+    public Color Color { get; set; }
 
-    public Star(float _Xlocation, float _Ylocation, Color _color)
+    public Star(string _name, float _Xlocation, float _Ylocation, Color _color)
     {
+        Name = _name;
         Xlocation = _Xlocation;
         Ylocation = _Ylocation;
         Color = _color;
