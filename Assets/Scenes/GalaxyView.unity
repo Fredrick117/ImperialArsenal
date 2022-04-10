@@ -217,7 +217,7 @@ GameObject:
   - component: {fileID: 529492366}
   - component: {fileID: 529492368}
   - component: {fileID: 529492367}
-  m_Layer: 5
+  m_Layer: 6
   m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -231,8 +231,8 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 529492365}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -22}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1677525285}
@@ -240,8 +240,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: -0.000030517578, y: 0}
+  m_SizeDelta: {x: 444.2, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &529492367
 MonoBehaviour:
@@ -496,8 +496,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6f9c2749a389804eb857c089d74ea46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxConnectionDistance: 125
+  N: 16
+  maxConnectionDistance: 175
   systemSprite: {fileID: -2413806693520163455, guid: 09b4f19467f3121438c3cfbcb07392b4, type: 3}
+  spacing: 25
 --- !u!1 &2106458952
 GameObject:
   m_ObjectHideFlags: 0
@@ -527,58 +529,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e3aabddd0d889c44b93b064c678cc68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  StarSystemNames:
-  - Ahnar
-  - Zubana
-  - Komle
-  - Usta
-  - Zyb
-  - Sama
-  - Alhim
-  - Falha
-  - Zamok
-  - Korolis Ray
-  - FR-9097b
-  - Vovio
-  - Ovhil
-  - Cassio
-  - Urgarius
-  - Irel
-  - Daryus
-  - Noxus
-  - Demyr
-  - Ionia
-  - Demacia
-  - Lambda Paradisus
-  - Chi Caelum
-  - Meritum
-  - Harena
-  - Hio
-  - Urs
-  - Gav
-  - 8970987c
-  - Ymir
-  - Hildr
-  - Signy
-  - Siv
-  - Skadi
-  - Nanna
-  - Papur
-  - Atla
-  - Eir
-  - Freya
-  - Saga
-  - Skul
-  - Var
-  - Bol
-  - Flot
-  - Duble
-  - Snotra
-  - Yggdrasil
-  - Eostre
-  - Tyr
-  - Yngvi
-  - Ull
 --- !u!4 &2106458954
 Transform:
   m_ObjectHideFlags: 0

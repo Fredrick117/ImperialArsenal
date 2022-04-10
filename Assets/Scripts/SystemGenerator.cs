@@ -6,39 +6,32 @@ using UnityEngine.UI;
 
 public class SystemGenerator : MonoBehaviour
 {
-    // Number of systems to generate
-    [SerializeField] private static int N = 21;
+    // Number of systems to generate (must be a perfect square)
+    [SerializeField]
+    private int N;
 
     // Maximum distance between systems
-    [SerializeField] private float maxConnectionDistance = 100f;
+    [SerializeField]
+    private float maxConnectionDistance;
 
-    [SerializeField] private Sprite systemSprite;
+    [SerializeField]
+    private Sprite systemSprite;
 
-    // Adjacency matrix, vertices, and edges
-    private int[,] A;
+    // Space in between spawn areas and edges of the viewport
+    [SerializeField]
+    private float spacing = 25f;
 
-    // make dictionary for connecting edges?
-    private List<GameObject> V;
+    // Adjacency matrix
+    private int[,] AdjMatrix;
 
     private RectTransform mapContainer;
 
-    private List<int> perfectSquares = new List<int> { 1, 4, 9, 25, 36, 49, 64, 81, 100 };
-
-    int cellsPerRow;
-    float rowWidth, cellSize;
+    private int cellsPerRow;
+    private float rowWidth, cellSize;
 
     private void Awake()
     {
         mapContainer = gameObject.GetComponent<RectTransform>();
-
-        
-
-        V = new List<GameObject>();
-
-        if (!perfectSquares.Contains(N))
-        {
-            N = GetNextLargestInt(N, perfectSquares);
-        }
 
         cellsPerRow = (int)Mathf.Sqrt(N);
         rowWidth = mapContainer.rect.width;
@@ -53,28 +46,29 @@ public class SystemGenerator : MonoBehaviour
         }
     }
 
-    private void Start()
-    {
-        //int cellsPerRow = (int)Mathf.Sqrt(N);
-        //float rowWidth = mapContainer.rect.width;
-        //float cellSize = rowWidth / cellsPerRow;
-
-        //PopulateCells(cellSize);
-        //CreateAdjacencyMatrix();
-        //ConnectSystems();
-    }
-
+    /// <summary>
+    /// Called to generate the raw data for all star systems.
+    /// This data includes:
+        /// - Name
+        /// - X/Y location
+        /// - Star system type (singular, binary, trinary)
+        /// - All celestial objects within each star system
+    /// Once this data has been generated, it is placed within the "Galaxy" variable in GameManager.
+    /// </summary>
     public void GenerateSystems()
     {
         List<StarSystem> systemList = new List<StarSystem>();
 
+        ShuffleArray(StarSystemNames);
+
+        // TODO: use math, not game objects.
         GameObject[] spawnAreaList = GameObject.FindGameObjectsWithTag("SpawnArea");
 
         for (int i = 0; i < N; i++)
         {
             int numObjects = Random.Range(1, 14);
 
-            // DANGER: what if names dictionary is smaller than N?
+            // DANGER: make sure dictionary is always larger than N
             string starName = StarSystemNames[i];
 
             Star s = new Star(starName, 0, 0, Color.yellow);
@@ -84,10 +78,10 @@ public class SystemGenerator : MonoBehaviour
             objects.Add(s);
 
             RectTransform r = spawnAreaList[i].GetComponent<RectTransform>();
-            float xMin = r.anchoredPosition.x - (cellSize / 2);
-            float xMax = r.anchoredPosition.x + (cellSize / 2);
-            float yMin = r.anchoredPosition.y - (cellSize / 2);
-            float yMax = r.anchoredPosition.y + (cellSize / 2);
+            float xMin = (r.anchoredPosition.x - (cellSize / 2)) + spacing;
+            float xMax = (r.anchoredPosition.x + (cellSize / 2)) - spacing;
+            float yMin = (r.anchoredPosition.y - (cellSize / 2)) + spacing;
+            float yMax = (r.anchoredPosition.y + (cellSize / 2)) - spacing;
 
             StarSystem ss = new StarSystem(
                 starName,
@@ -103,147 +97,148 @@ public class SystemGenerator : MonoBehaviour
                 objects.Add(new Planet(starName + " " + ToRomanNumerals(j + 2), RandomEnumValue<PlanetType>(), Random.Range(1, 20), 0, 0));
             }
 
-            //Debug.Log("Star system " + i + " name: " + ss.Name);
-            //Debug.Log("Star system " + i + " type: " + ss.Type);
-            //foreach (Object o in ss.Objects)
-            //{
-            //    Debug.Log("Planet name: " + o.Name);
-            //}
-
-            RenderStarSystem(new Vector2(ss.Xlocation, ss.Ylocation));
-
             systemList.Add(ss);
         }
-
-        // 4) add system list to galaxy object
 
         GameManager.Instance.Galaxy.StarSystems = systemList;
     }
 
-    public void PopulateCells(float cellSize)
-    {
-        // TODO: create buffer
-        // x position + [buffer], y position + [buffer]?
-        GameObject[] spawnAreaList = GameObject.FindGameObjectsWithTag("SpawnArea");
-        foreach (GameObject gameObject in spawnAreaList)
-        {
-            RectTransform r = gameObject.GetComponent<RectTransform>();
-            float xMin = r.anchoredPosition.x - (cellSize / 2);
-            float xMax = r.anchoredPosition.x + (cellSize / 2);
-            float yMin = r.anchoredPosition.y - (cellSize / 2);
-            float yMax = r.anchoredPosition.y + (cellSize / 2);
-
-            //V.Add(CreateSystem(new Vector2(Random.Range(xMin, xMax), Random.Range(yMin, yMax))));
-        }
-    }
-
-    private GameObject RenderStarSystem(Vector2 position)
+    /// <summary>
+    /// Renders a star system (along with a text label) on screen.
+    /// </summary>
+    /// <param name="starSystem">The star system to render</param>
+    public GameObject RenderStarSystem(StarSystem starSystem)
     {
         GameObject gameObject = new GameObject("System", typeof(Image));
+        gameObject.tag = "StarSystem";
         gameObject.transform.SetParent(mapContainer, false);
         gameObject.GetComponent<Image>().sprite = systemSprite;
         RectTransform rect = gameObject.GetComponent<RectTransform>();
-        rect.anchoredPosition = position;
+        rect.anchoredPosition = new Vector2(starSystem.Xlocation, starSystem.Ylocation);
         rect.anchorMin = new Vector2(0, 0);
         rect.anchorMax = new Vector2(0, 0);
         rect.sizeDelta = new Vector2(11, 11);
 
+        GameObject nameGameObject = new GameObject("SystemText", typeof(RectTransform));
+        nameGameObject.transform.SetParent(gameObject.transform, false);
+
+        Text text = nameGameObject.AddComponent<Text>();
+        Font font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
+        text.font = font;
+        text.text = starSystem.Name;
+        text.alignment = TextAnchor.UpperCenter;
+
+        RectTransform textRT = nameGameObject.GetComponent<RectTransform>();
+
+        textRT.sizeDelta = new Vector2(textRT.sizeDelta.x, 33f);
+        textRT.anchoredPosition = new Vector2(textRT.anchoredPosition.x, -33f);
+
         return gameObject;
     }
 
-    private void CreateSpawnArea(float cellSize, int i, int j)
+    /// <summary>
+    /// Creates a GameObject whose primary purpose is to guide the placement of star systems on screen.
+    /// N spawn areas will be created, and a star system will be placed inside the bounds of this area.
+    /// </summary>
+    /// <param name="cellSize">The width/height of each spawn area</param>
+    /// <param name="i">Current row iteration</param>
+    /// <param name="j">Current column iteration</param>
+    private void CreateSpawnArea(float cellSize, int row, int col)
     {
-        GameObject gameObject = new GameObject("SpawnArea" + ((i + j) + 1), typeof(Image));
+        GameObject gameObject = new GameObject("SpawnArea", typeof(Image));
         gameObject.tag = "SpawnArea";
         gameObject.transform.SetParent(mapContainer, false);
-        gameObject.GetComponent<Image>().color = new Color(0, 0, 0, 0.5f);
+        gameObject.GetComponent<Image>().color = Color.clear;
         RectTransform rect = gameObject.GetComponent<RectTransform>();
         rect.anchorMin = new Vector2(0, 0);
         rect.anchorMax = new Vector2(0, 0);
         rect.sizeDelta = new Vector2(cellSize, cellSize);
-        Vector2 spawnPosition = new Vector2((cellSize / 2) + (i * cellSize), (mapContainer.rect.height - (cellSize / 2)) - (j * cellSize));
+        Vector2 spawnPosition = new Vector2((cellSize / 2) + (row * cellSize), (mapContainer.rect.height - (cellSize / 2)) - (col * cellSize));
         rect.anchoredPosition = spawnPosition;
     }
 
-    private void CreateAdjacencyMatrix()
+    /// <summary>
+    /// Creates an adjacency matrix that can be used to identify which star systems are connected.
+    /// Connectivity is based on the distance between two star systems: if the distance between any two systems is less than the maxConnectionDistance,
+    /// those two systems can be considered "adjacent" or "connected".
+    /// </summary>
+    public void CreateAdjacencyMatrix()
     {
-        A = new int[N, N];
+        AdjMatrix = new int[N, N];
 
-        for (int i = 0; i < V.Count; i++)
+        for (int i = 0; i < N; i++)
         {
-            for (int j = 0; j < V.Count; j++)
+            for (int j = 0; j < N; j++)
             {
-                float dist = Vector2.Distance(V[i].transform.position, V[j].transform.position);
+                float dist = Vector2.Distance(GetStarSystemVector(i), GetStarSystemVector(j));
 
                 if (dist != 0 && dist <= maxConnectionDistance)
                 {
-                    A[i, j] = 1;
+                    AdjMatrix[i, j] = 1;
                 }
             }
         }
     }
 
-    private void CreateSystemConnection(Vector2 A, Vector2 B)
+    /// <summary>
+    /// Renders a connection that takes the form of a translucent blue line and represents the adjacency relationship between two star systems.
+    /// </summary>
+    /// <param name="systemA">The position of the original star system</param>
+    /// <param name="systemB">The position of another star system that is connected to system A</param>
+    private void RenderSystemConnectors(Vector2 systemA, Vector2 systemB)
     {
-        GameObject gameObject = new GameObject("connector", typeof(Image));
-        gameObject.transform.SetParent(mapContainer, false);
-        gameObject.GetComponent<Image>().color = new Color(1, 1, 1, 0.25f);
-        RectTransform rect = gameObject.GetComponent<RectTransform>();
-        Vector2 direction = (B - A).normalized;
-        float distance = Vector2.Distance(A, B);
+        GameObject connector = new GameObject("Connector", typeof(Image));
+        connector.transform.SetParent(mapContainer, false);
+        connector.GetComponent<Image>().color = new Color(0, 255, 255, 0.05f);
+
+        RectTransform rect = connector.GetComponent<RectTransform>();
+        Vector2 direction = (systemB - systemA).normalized;
+        float distance = Vector2.Distance(systemA, systemB);
         rect.anchorMin = new Vector2(0, 0);
         rect.anchorMax = new Vector2(0, 0);
         rect.sizeDelta = new Vector2(distance, 2f);
-        rect.anchoredPosition = A + direction * distance * .5f;
+        rect.anchoredPosition = systemA + direction * distance * .5f;
         rect.localEulerAngles = new Vector3(0, 0, (Mathf.Atan2(direction.y, direction.x) * 180 / Mathf.PI));
     }
 
-    private void ConnectSystems()
+    /// <summary>
+    /// Reads the adjacency matrix, rendering the connectors on screen for each connection.
+    /// 
+    /// TODO: IS THIS NECESSARY? SHOULDN'T THE CONNECTORS BE RENDERED WHEN THE ADJACENCY IS CREATED IN THE FIRST PLACE?
+    /// </summary>
+    public void ConnectSystems()
     {
-        for (int i = 0; i < V.Count; i++)
-            for (int j = 0; j < V.Count; j++)
-                if (A[i, j] == 1)
-                    CreateSystemConnection(V[i].GetComponent<RectTransform>().anchoredPosition, V[j].GetComponent<RectTransform>().anchoredPosition);
-    }
-
-    private int GetNextLargestInt(int num, List<int> list)
-    {
-        foreach (int i in list)
+        for (int i = 0; i < N; i++)
         {
-            if (i > num)
+            for (int j = 0; j < N; j++)
             {
-                return i;
+                if (AdjMatrix[i, j] == 1)
+                {
+                    StarSystem systemI = GameManager.Instance.Galaxy.StarSystems[i];
+                    StarSystem systemJ = GameManager.Instance.Galaxy.StarSystems[j];
+
+                    RenderSystemConnectors(new Vector2(systemI.Xlocation, systemI.Ylocation), new Vector2(systemJ.Xlocation, systemJ.Ylocation));
+                }
             }
         }
-        // refactor
-        return num;
     }
 
-    //private void PopulateSystem(List<Object> objList)
-    //{
-    //    int numPlanets = Random.Range(0, 15);
-
-    //    for (int i = 0; i < numPlanets; i++)
-    //    {
-    //        ObjType obj = RandomEnumValue<ObjType>();
-
-    //        if (obj == ObjType.HabitablePlanet)
-    //        {
-    //            Planet p = new Planet(RandomEnumValue<PlanetType>, );
-    //        }
-    //        else if (obj == ObjType.Star)
-    //        {
-
-    //        }
-    //    }
-    //}
-
+    /// <summary>
+    /// Selects a random element from an enumeration.
+    /// </summary>
+    /// <typeparam name="T">The enum that we wish to select a random element from</typeparam>
+    /// <returns>A random value from the declared enumeration</returns>
     private T RandomEnumValue<T>()
     {
         var vals = System.Enum.GetValues(typeof(T));
         return (T)vals.GetValue(Random.Range(0, vals.Length - 1));
     }
 
+    /// <summary>
+    /// Converts an integer to it's Roman Numeral equivalent.
+    /// </summary>
+    /// <param name="num">The integer that is to be converted</param>
+    /// <returns>A string value representing the integer in Roman Numeral format.</returns>
     private string ToRomanNumerals(int num)
     {
         // TODO: add more
@@ -284,17 +279,34 @@ public class SystemGenerator : MonoBehaviour
         }
     }
 
-    // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_modern_algorithm
+    /// <summary>
+    /// Shuffles an array with elements of type T. Based on the Fisher-Yates algorithm: https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_modern_algorithm
+    /// </summary>
+    /// <typeparam name="T">Type of the array</typeparam>
+    /// <param name="array">The array that is to be shuffled</param>
     private static void ShuffleArray<T>(T[] array)
     {
         for (int i = 0; i < array.Length - 2; i++)
         {
             int j = Random.Range(i, array.Length - 1);
+            var temp = array[i];
             array[i] = array[j];
+            array[j] = temp;
         }
     }
 
-    public string[] StarSystemNames = new string[] {
+    /// <summary>
+    /// A helper method that improves readability by converting the float values of a star system's location into a Vector2 value.
+    /// </summary>
+    /// <param name="i">Iteration value that is used to look up star systems</param>
+    /// <returns>A star system's position in Vector2 format</returns>
+    private Vector2 GetStarSystemVector(int i)
+    {
+        return new Vector2(GameManager.Instance.Galaxy.StarSystems[i].Xlocation, GameManager.Instance.Galaxy.StarSystems[i].Ylocation);
+    }
+
+    // A collection of possible names for star systems.
+    private string[] StarSystemNames = new string[] {
         "Ahnar",
         "Zubana",
         "Komle",
@@ -310,19 +322,21 @@ public class SystemGenerator : MonoBehaviour
         "Ovhil",
         "Cassio",
         "Urgarius",
-        "Irel",
+        "Irle",
         "Daryus",
-        "Noxus",
         "Demyr",
         "Ionia",
-        "Demacia",
-        "Lambda Paradisus",
-        "Chi Caelum",
+        "Paradis",
+        "Marley",
+        "Hizuru",
+        "Caelum",
         "Meritum",
         "Harena",
         "Hio",
         "Urs",
         "Gav",
+        "091782098731f",
+        "X39-57-c",
         "8970987c",
         "Ymir",
         "Hildr",
@@ -346,5 +360,25 @@ public class SystemGenerator : MonoBehaviour
         "Tyr",
         "Yngvi",
         "Ull",
+        "Kral",
+        "Lum",
+        "Hut",
+        "Nic",
+        "Rad",
+        "Aust",
+        "Mica",
+        "Gart",
+        "Feric",
+        "Ira",
+        "Lerach",
+        "Roq",
+        "Horus",
+        "Midnight",
+        "Litza",
+        "Drost",
+        "Rusl",
+        "Nanua",
+        "Roub",
+        "Angel",
     };
 }
