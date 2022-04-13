@@ -21,7 +21,6 @@ public enum PlanetType
 {
     Arctic,
     Lava,
-    Water,
     Terrestrial,
     Desert,
     GasGiant,
@@ -59,27 +58,28 @@ public class Galaxy
     {}
 }
 
+[Serializable]
 public class StarSystem
 {
     public string Name             { get; set; }
     public SystemType Type         { get; set; }
     public float Xlocation         { get; set; }
     public float Ylocation         { get; set; }
-    public List<Object> Objects    { get; set; }
+    public List<Planet> Planets    { get; set; }
 
-    public StarSystem(string _name, SystemType _type, float _xLocation, float _yLocation, List<Object> _objects) 
+    public StarSystem(string _name, SystemType _type, float _xLocation, float _yLocation, List<Planet> _planets) 
     {
         Name = _name;
         Type = _type;
         Xlocation = _xLocation;
         Ylocation = _yLocation;
-        Objects = _objects;
+        Planets = _planets;
     }
 
-    public void AddObjectToStarSystem(Object o)
-    {
-        Objects.Add(o);
-    }
+    //public void AddObjectToStarSystem(Planet p)
+    //{
+    //    Planets.Add(p);
+    //}
 }
 
 public class Object
@@ -91,10 +91,21 @@ public class Object
 
 public class Planet : Object
 {
-    public PlanetType PlanetType     { get; set; }
-    public float DistanceFromStar    { get; set; }
+    public PlanetType PlanetType    { get; set; }
+    public float DistanceFromStar   { get; set; }
+    public float Diameter           { get; set; }
+    public float Mass               { get; set; }
+    public float AverageTemperature 
+    {
+        get 
+        {
+            // TODO: Calculate https://en.wikipedia.org/wiki/Effective_temperature#Planet
+            return 0;
+        }
+    }
+    public List<Planet> Satellites  { get; set; }
 
-    public Planet(string _name, PlanetType _type, float _distanceFromStar, float _Xlocation, float _Ylocation)
+    public Planet(string _name, PlanetType _type, float _distanceFromStar, float _mass, List<Planet> _satellites)
     {
         Name = _name;
         PlanetType = _type;
@@ -102,8 +113,7 @@ public class Planet : Object
         //this.TotalPopulation = _population;
         //this.SpeciesList = _list;
         DistanceFromStar = _distanceFromStar;
-        Xlocation = _Xlocation;
-        Ylocation = _Ylocation;
+        Satellites = _satellites;
     }
 }
 

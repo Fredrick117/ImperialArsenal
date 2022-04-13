@@ -71,17 +71,22 @@ public class SystemGenerator : MonoBehaviour
             // DANGER: make sure dictionary is always larger than N
             string starName = StarSystemNames[i];
 
-            Star s = new Star(starName, 0, 0, Color.yellow);
+            //Star s = new Star(starName, 0, 0, Color.yellow);
 
-            List<Object> objects = new List<Object>();
+            List<Planet> objects = new List<Planet>();
 
-            objects.Add(s);
+            //objects.Add(s);
 
             RectTransform r = spawnAreaList[i].GetComponent<RectTransform>();
             float xMin = (r.anchoredPosition.x - (cellSize / 2)) + spacing;
             float xMax = (r.anchoredPosition.x + (cellSize / 2)) - spacing;
             float yMin = (r.anchoredPosition.y - (cellSize / 2)) + spacing;
             float yMax = (r.anchoredPosition.y + (cellSize / 2)) - spacing;
+
+            for (int j = 0; j < numObjects - 1; j++)
+            {
+                objects.Add(new Planet(starName + " " + ToRomanNumerals(j + 2), RandomEnumValue<PlanetType>(), Random.Range(25, 325)));
+            }
 
             StarSystem ss = new StarSystem(
                 starName,
@@ -91,11 +96,6 @@ public class SystemGenerator : MonoBehaviour
                 // TODO: separate star and planets
                 objects
             );
-
-            for (int j = 0; j < numObjects - 1; j++)
-            {
-                objects.Add(new Planet(starName + " " + ToRomanNumerals(j + 2), RandomEnumValue<PlanetType>(), Random.Range(1, 20), 0, 0));
-            }
 
             systemList.Add(ss);
         }
@@ -132,6 +132,9 @@ public class SystemGenerator : MonoBehaviour
 
         textRT.sizeDelta = new Vector2(textRT.sizeDelta.x, 33f);
         textRT.anchoredPosition = new Vector2(textRT.anchoredPosition.x, -33f);
+
+        StarSystemManager manager = gameObject.AddComponent<StarSystemManager>();
+        manager.systemProperties = starSystem;
 
         return gameObject;
     }

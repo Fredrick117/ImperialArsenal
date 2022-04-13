@@ -5,6 +5,7 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
+    public StarSystem selectedStarSystem;
 
     public Galaxy Galaxy;
 
@@ -18,10 +19,7 @@ public class GameManager : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
-    }
 
-    private void Start()
-    {
         Galaxy = new Galaxy();
 
         // Should all of this be done in SystemGenerator, not here?
@@ -29,7 +27,7 @@ public class GameManager : MonoBehaviour
 
         generator.GenerateSystems();
         foreach (StarSystem ss in Galaxy.StarSystems)
-        { 
+        {
             generator.RenderStarSystem(ss);
         }
 
@@ -42,9 +40,9 @@ public class GameManager : MonoBehaviour
         Galaxy.StarSystems.Add(system);
     }
 
-    public void AddPlanet(StarSystem system, Object obj)
+    public void AddPlanet(StarSystem system, Planet p)
     {
         // Todo: refactor
-        Galaxy.StarSystems[Galaxy.StarSystems.IndexOf(system)].Objects.Add(obj);
+        Galaxy.StarSystems[Galaxy.StarSystems.IndexOf(system)].Planets.Add(p);
     }
 }
