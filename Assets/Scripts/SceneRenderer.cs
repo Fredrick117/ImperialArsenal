@@ -20,10 +20,11 @@ public class SceneRenderer : MonoBehaviour
         star.transform.SetParent(mapContainer);
         Image img = star.GetComponent<Image>();
         img.sprite = celestialObjSprite;
-        img.color = Color.yellow;
+        img.color = currentStarSystem.Star.Color;
 
         RectTransform starRT = star.GetComponent<RectTransform>();
         starRT.anchoredPosition = Vector2.zero;
+        // TODO: Size based on star type
         starRT.sizeDelta = new Vector2(25, 25);
 
         print(currentStarSystem.Planets.Count);

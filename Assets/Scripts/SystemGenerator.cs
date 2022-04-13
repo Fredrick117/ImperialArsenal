@@ -85,16 +85,17 @@ public class SystemGenerator : MonoBehaviour
 
             for (int j = 0; j < numObjects - 1; j++)
             {
-                objects.Add(new Planet(starName + " " + ToRomanNumerals(j + 2), RandomEnumValue<PlanetType>(), Random.Range(25, 325)));
+                objects.Add(new Planet(starName + " " + ToRomanNumerals(j + 2), RandomEnumValue<PlanetType>(), Random.Range(25, 325), Random.Range(10, 25)));
             }
+
+            Star star = new Star(starName, RandomEnumValue<StarType>());
 
             StarSystem ss = new StarSystem(
                 starName,
-                RandomEnumValue<SystemType>(),
                 Random.Range(xMin, xMax),
                 Random.Range(yMin, yMax),
-                // TODO: separate star and planets
-                objects
+                objects,
+                star
             );
 
             systemList.Add(ss);

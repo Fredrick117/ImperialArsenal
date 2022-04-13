@@ -3,12 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum SystemType
+public enum StarType
 {
-    Singular,
-    Binary,
-    Trinary,
-    Quaternary
+    M,
+    K,
+    G,
+    F,
+    A,
+    B,
+    O
 }
 
 public enum ObjType
@@ -61,51 +64,30 @@ public class Galaxy
 [Serializable]
 public class StarSystem
 {
-    public string Name             { get; set; }
-    public SystemType Type         { get; set; }
-    public float Xlocation         { get; set; }
-    public float Ylocation         { get; set; }
-    public List<Planet> Planets    { get; set; }
+    public string Name              { get; set; }
+    public float Xlocation          { get; set; }
+    public float Ylocation          { get; set; }
+    public List<Planet> Planets     { get; set; }
+    public Star Star                { get; set; }
 
-    public StarSystem(string _name, SystemType _type, float _xLocation, float _yLocation, List<Planet> _planets) 
+    public StarSystem(string _name, float _xLocation, float _yLocation, List<Planet> _planets, Star _star) 
     {
         Name = _name;
-        Type = _type;
         Xlocation = _xLocation;
         Ylocation = _yLocation;
         Planets = _planets;
+        Star = _star;
     }
-
-    //public void AddObjectToStarSystem(Planet p)
-    //{
-    //    Planets.Add(p);
-    //}
 }
 
-public class Object
+public class Planet
 {
-    public string Name { get; set; }
-    public float Xlocation { get; set; }
-    public float Ylocation { get; set; }
-}
-
-public class Planet : Object
-{
+    public string Name {get; set;}
     public PlanetType PlanetType    { get; set; }
     public float DistanceFromStar   { get; set; }
-    public float Diameter           { get; set; }
-    public float Mass               { get; set; }
-    public float AverageTemperature 
-    {
-        get 
-        {
-            // TODO: Calculate https://en.wikipedia.org/wiki/Effective_temperature#Planet
-            return 0;
-        }
-    }
-    public List<Planet> Satellites  { get; set; }
+    public float Radius           { get; set; }
 
-    public Planet(string _name, PlanetType _type, float _distanceFromStar, float _mass, List<Planet> _satellites)
+    public Planet(string _name, PlanetType _type, float _distanceFromStar, float _radius)
     {
         Name = _name;
         PlanetType = _type;
@@ -113,20 +95,44 @@ public class Planet : Object
         //this.TotalPopulation = _population;
         //this.SpeciesList = _list;
         DistanceFromStar = _distanceFromStar;
-        Satellites = _satellites;
+        Radius = _radius;
     }
 }
 
-public class Star : Object
+public class Star
 {
-    public Color Color { get; set; }
+    public string Name {get; set;}
+    
+    public StarType Type {get; set;}
 
-    public Star(string _name, float _Xlocation, float _Ylocation, Color _color)
+    public Color32 Color { 
+        get {
+            switch (Type) 
+            {
+                case StarType.M:
+                    return new Color32(255, 148, 8, 255);
+                case StarType.K:
+                    return new Color32(255, 177, 82, 255);
+                case StarType.G:
+                    return new Color32(255, 227, 105, 255);
+                case StarType.F:
+                    return new Color32(255, 227, 105, 255);
+                case StarType.A:
+                    return new Color32(161, 170, 255, 255);
+                case StarType.B:
+                    return new Color32(217, 220, 255, 255);
+                case StarType.O:
+                    return new Color32(235, 236, 255, 255);
+                default:
+                    return new Color32(255, 255, 255, 255);
+            }         
+        }
+     }
+
+    public Star(string _name, StarType _type)
     {
         Name = _name;
-        Xlocation = _Xlocation;
-        Ylocation = _Ylocation;
-        Color = _color;
+        Type = _type;
     }
 }
 
