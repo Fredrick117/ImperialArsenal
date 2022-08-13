@@ -9,12 +9,15 @@ public class StarSystemManager : MonoBehaviour, IPointerEnterHandler, IPointerEx
 {
     public StarSystem systemProperties;
     private SpriteRenderer spriteRenderer;
-    private Color32 initColor;
 
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        initColor = spriteRenderer.color;
+    }
+
+    private void Start()
+    {
+        spriteRenderer.color = systemProperties.Star.Color;
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -30,6 +33,6 @@ public class StarSystemManager : MonoBehaviour, IPointerEnterHandler, IPointerEx
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        spriteRenderer.color = initColor;
+        spriteRenderer.color = systemProperties.Star.Color;
     }
 }

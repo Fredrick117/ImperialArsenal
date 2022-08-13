@@ -421,9 +421,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e3aabddd0d889c44b93b064c678cc68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numStarSystems: 15
+  numStarSystems: 35
   starSystemPrefab: {fileID: 3119768363635536916, guid: abfeab9e8a7360046b4572fd190e4016, type: 3}
   galaxy: []
+  borderPadding: 0.5
+  minDistBetweenSystems: 0.05
 --- !u!4 &2106458954
 Transform:
   m_ObjectHideFlags: 0

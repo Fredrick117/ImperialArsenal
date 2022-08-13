@@ -15,6 +15,10 @@ public class GameManager : MonoBehaviour
 
     public StarSystem[] galaxy;
 
+    public float borderPadding;
+
+    public float minDistBetweenSystems;
+
     private void Awake()
     {
         if (Instance != null)
@@ -44,22 +48,22 @@ public class GameManager : MonoBehaviour
 
             SpaceObject[] objects = new SpaceObject[numObjects];
 
-            float xMin = -Camera.main.orthographicSize;
-            float xMax = Camera.main.orthographicSize;
-            float yMin = -Camera.main.orthographicSize / 2;
-            float yMax = Camera.main.orthographicSize / 2;
+            float xMin = (-Camera.main.orthographicSize * Screen.width / Screen.height) + borderPadding;
+            float xMax = (Camera.main.orthographicSize * Screen.width / Screen.height) - borderPadding;
+            float yMin = -Camera.main.orthographicSize + borderPadding;
+            float yMax = Camera.main.orthographicSize - borderPadding;
 
             for (int j = 0; j < numObjects - 1; j++)
             {
                 objects[j] = new Planet(starName + " " + ToRomanNumerals(j + 2), RandomEnumValue<PlanetType>(), Random.Range(25, 325), Random.Range(10, 25));
             }
 
-            Star star = new Star(starName, RandomEnumValue<StarType>());
+            Star star = new Star(starName, Random.Range(0.15f, 0.25f), RandomEnumValue<StarType>());
 
             StarSystem ss = new StarSystem(
                 starName,
-                Random.Range(xMin, xMax),
-                Random.Range(yMin, yMax),
+                //Random.Range(xMin, xMax),
+                //Random.Range(yMin, yMax),
                 objects,
                 star
             );
@@ -70,10 +74,30 @@ public class GameManager : MonoBehaviour
 
     private void RenderGalaxyView()
     {
+        float xMin = (-Camera.main.orthographicSize * Screen.width / Screen.height) + borderPadding;
+        float xMax = (Camera.main.orthographicSize * Screen.width / Screen.height) - borderPadding;
+        float yMin = -Camera.main.orthographicSize + borderPadding;
+        float yMax = Camera.main.orthographicSize - borderPadding;
+
         foreach (StarSystem ss in galaxy)
         {
-            GameObject starSystemGO = GameObject.Instantiate(starSystemPrefab, new Vector2(ss.Xlocation, ss.Ylocation), Quaternion.identity);
-            starSystemGO.GetComponent<SpriteRenderer>().color = ss.Star.Color;
+            bool canSpawn = false;
+            while (!canSpawn)
+            {
+                float x = Random.Range(xMin, xMax);
+                float y = Random.Range(yMin, yMax);
+
+                Collider2D nearbyStarSystems = Physics2D.OverlapCircle(new Vector2(x, y), minDistBetweenSystems, LayerMask.GetMask("StarSystems"));
+
+                if (!nearbyStarSystems)
+                {
+                    canSpawn = true;
+                    GameObject starSystemGO = GameObject.Instantiate(starSystemPrefab, new Vector2(x, y), Quaternion.identity);
+                    starSystemGO.GetComponent<StarSystemManager>().systemProperties = ss;
+                    //starSystemGO.GetComponent<SpriteRenderer>().color = ss.Star.Color;
+                    //starSystemGO.transform.localScale = new Vector3(ss.Star.Radius, ss.Star.Radius, ss.Star.Radius);
+                }
+            }
         }
     }
 

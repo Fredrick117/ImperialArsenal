@@ -63,11 +63,11 @@ public class StarSystem
     public SpaceObject[] Objects { get; set; }
     public Star Star            { get; set; }
 
-    public StarSystem(string _name, float _xLocation, float _yLocation, SpaceObject[] _objects, Star _star) 
+    public StarSystem(string _name, SpaceObject[] _objects, Star _star) 
     {
         Name = _name;
-        Xlocation = _xLocation;
-        Ylocation = _yLocation;
+        //Xlocation = _xLocation;
+        //Ylocation = _yLocation;
         Objects = _objects;
         Star = _star;
     }
@@ -123,6 +123,7 @@ public class Planet : SpaceObject
 public class Star : SpaceObject
 {
     public StarType Type { get; set; }
+    public float Radius { get; set; }
 
     public Color32 Color 
     { 
@@ -131,28 +132,29 @@ public class Star : SpaceObject
             switch (Type) 
             {
                 case StarType.M:
-                    return new Color32(255, 148, 8, 255);
+                    return new Color32(237, 30, 30, 255);
                 case StarType.K:
-                    return new Color32(255, 177, 82, 255);
+                    return new Color32(237, 116, 30, 255);
                 case StarType.G:
-                    return new Color32(255, 227, 105, 255);
+                    return new Color32(255, 220, 48, 255);
                 case StarType.F:
-                    return new Color32(255, 227, 105, 255);
+                    return new Color32(255, 255, 255, 255);
                 case StarType.A:
-                    return new Color32(161, 170, 255, 255);
+                    return new Color32(135, 219, 255, 255);
                 case StarType.B:
-                    return new Color32(217, 220, 255, 255);
+                    return new Color32(45, 152, 252, 255);
                 case StarType.O:
-                    return new Color32(235, 236, 255, 255);
+                    return new Color32(0, 33, 255, 255);
                 default:
                     return new Color32(255, 255, 255, 255);
             }         
         }
     }
 
-    public Star(string _name, StarType _type)
+    public Star(string _name, float _radius, StarType _type)
     {
         Name = _name;
+        Radius = _radius;
         Type = _type;
     }
 }
