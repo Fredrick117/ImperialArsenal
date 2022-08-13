@@ -53,60 +53,81 @@ public enum PersonalityTraits
     Sympathetic = 1 << 17,
 };
 
-public class Galaxy
-{
-    public List<StarSystem> StarSystems { get; set; }
-
-    public Galaxy() 
-    {}
-}
-
 [Serializable]
 public class StarSystem
 {
-    public string Name              { get; set; }
-    public float Xlocation          { get; set; }
-    public float Ylocation          { get; set; }
-    public List<Planet> Planets     { get; set; }
-    public Star Star                { get; set; }
+    [SerializeField]
+    public string Name          { get; set; }
+    public float Xlocation      { get; set; }
+    public float Ylocation      { get; set; }
+    public SpaceObject[] Objects { get; set; }
+    public Star Star            { get; set; }
 
-    public StarSystem(string _name, float _xLocation, float _yLocation, List<Planet> _planets, Star _star) 
+    public StarSystem(string _name, float _xLocation, float _yLocation, SpaceObject[] _objects, Star _star) 
     {
         Name = _name;
         Xlocation = _xLocation;
         Ylocation = _yLocation;
-        Planets = _planets;
+        Objects = _objects;
         Star = _star;
     }
 }
 
-public class Planet
+[Serializable]
+public class SpaceObject
 {
-    public string Name {get; set;}
-    public PlanetType PlanetType    { get; set; }
-    public float DistanceFromStar   { get; set; }
-    public float Radius           { get; set; }
+    public string Name { get; set; }
+    public float X { get; set; }
+    public float Y { get; set; }
+}
+
+[Serializable]
+public class Planet : SpaceObject
+{
+    public PlanetType PlanetType;
+    public float DistanceFromStar;
+    public float Radius;
+    public Color32 Color
+    {
+        get
+        {
+            switch (PlanetType)
+            {
+                case PlanetType.Arctic:
+                    return new Color32(200, 219, 250, 255);
+                case PlanetType.Lava:
+                   return new Color32(255, 80, 36, 255);
+                case PlanetType.Terrestrial:
+                    return new Color32(72, 150, 74, 255);
+                case PlanetType.Desert:
+                    return new Color32(235, 214, 141, 255);
+                case PlanetType.Ocean:
+                    return new Color32(24, 69, 122, 255);
+                case PlanetType.GasGiant:
+                    return new Color32(147, 83, 212, 255);
+                default:
+                    return new Color32(255, 5, 230, 255);
+            }
+        }
+    }
 
     public Planet(string _name, PlanetType _type, float _distanceFromStar, float _radius)
     {
         Name = _name;
         PlanetType = _type;
-        //this.IsInhabited = _inhabited;
-        //this.TotalPopulation = _population;
-        //this.SpeciesList = _list;
         DistanceFromStar = _distanceFromStar;
         Radius = _radius;
     }
 }
 
-public class Star
+public class Star : SpaceObject
 {
-    public string Name {get; set;}
-    
-    public StarType Type {get; set;}
+    public StarType Type { get; set; }
 
-    public Color32 Color { 
-        get {
+    public Color32 Color 
+    { 
+        get 
+        {
             switch (Type) 
             {
                 case StarType.M:
@@ -127,18 +148,11 @@ public class Star
                     return new Color32(255, 255, 255, 255);
             }         
         }
-     }
+    }
 
     public Star(string _name, StarType _type)
     {
         Name = _name;
         Type = _type;
     }
-}
-
-public class Species
-{
-    // Traits = BehaviorTrait.Fearful | BehaviorTrait.Hostile
-    PersonalityTraits Traits;
-    Planet NativePlanet;
 }

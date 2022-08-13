@@ -8,13 +8,13 @@ using UnityEngine.UI;
 public class StarSystemManager : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     public StarSystem systemProperties;
-    Image sprite;
-    Color initColor;
+    private SpriteRenderer spriteRenderer;
+    private Color32 initColor;
 
     private void Awake()
     {
-        sprite = GetComponent<Image>();
-        initColor = sprite.color;
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        initColor = spriteRenderer.color;
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -25,11 +25,11 @@ public class StarSystemManager : MonoBehaviour, IPointerEnterHandler, IPointerEx
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        sprite.color = Color.gray;
+        spriteRenderer.color = Color.gray;
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        sprite.color = initColor;
+        spriteRenderer.color = initColor;
     }
 }
