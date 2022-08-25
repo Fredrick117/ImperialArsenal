@@ -57,19 +57,21 @@ public enum PersonalityTraits
 public class StarSystem
 {
     [SerializeField]
-    public string Name          { get; set; }
-    public float Xlocation      { get; set; }
-    public float Ylocation      { get; set; }
-    public SpaceObject[] Objects { get; set; }
-    public Star Star            { get; set; }
+    public string Name              { get; set; }
+    public float xLocation          { get; set; }
+    public float yLocation          { get; set; }
+    public Planet[] Planets    { get; set; }
+    public Star Star                { get; set; }
+    public int ControlledBy         { get; set; }
 
-    public StarSystem(string _name, SpaceObject[] _objects, Star _star) 
+    public StarSystem(string _name, Planet[] _planets, Star _star, int _controlledBy, float _xLocation, float _yLocation)
     {
         Name = _name;
-        //Xlocation = _xLocation;
-        //Ylocation = _yLocation;
-        Objects = _objects;
+        Planets = _planets;
         Star = _star;
+        ControlledBy = _controlledBy;
+        xLocation = _xLocation;
+        yLocation = _yLocation;
     }
 }
 
@@ -85,38 +87,29 @@ public class SpaceObject
 public class Planet : SpaceObject
 {
     public PlanetType PlanetType;
-    public float DistanceFromStar;
-    public float Radius;
     public Color32 Color
     {
         get
         {
-            switch (PlanetType)
+            return PlanetType switch
             {
-                case PlanetType.Arctic:
-                    return new Color32(200, 219, 250, 255);
-                case PlanetType.Lava:
-                   return new Color32(255, 80, 36, 255);
-                case PlanetType.Terrestrial:
-                    return new Color32(72, 150, 74, 255);
-                case PlanetType.Desert:
-                    return new Color32(235, 214, 141, 255);
-                case PlanetType.Ocean:
-                    return new Color32(24, 69, 122, 255);
-                case PlanetType.GasGiant:
-                    return new Color32(147, 83, 212, 255);
-                default:
-                    return new Color32(255, 5, 230, 255);
-            }
+                PlanetType.Arctic => new Color32(200, 219, 250, 255),
+                PlanetType.Lava => new Color32(255, 80, 36, 255),
+                PlanetType.Terrestrial => new Color32(72, 150, 74, 255),
+                PlanetType.Desert => new Color32(235, 214, 141, 255),
+                PlanetType.Ocean => new Color32(24, 69, 122, 255),
+                PlanetType.GasGiant => new Color32(147, 83, 212, 255),
+                _ => new Color32(255, 5, 230, 255),
+            };
         }
     }
 
-    public Planet(string _name, PlanetType _type, float _distanceFromStar, float _radius)
+    public Planet(string _name, PlanetType _type, float _x, float _y)
     {
         Name = _name;
         PlanetType = _type;
-        DistanceFromStar = _distanceFromStar;
-        Radius = _radius;
+        X = _x;
+        Y = _y;
     }
 }
 
@@ -129,25 +122,17 @@ public class Star : SpaceObject
     { 
         get 
         {
-            switch (Type) 
+            return Type switch
             {
-                case StarType.M:
-                    return new Color32(237, 30, 30, 255);
-                case StarType.K:
-                    return new Color32(237, 116, 30, 255);
-                case StarType.G:
-                    return new Color32(255, 220, 48, 255);
-                case StarType.F:
-                    return new Color32(255, 255, 255, 255);
-                case StarType.A:
-                    return new Color32(135, 219, 255, 255);
-                case StarType.B:
-                    return new Color32(45, 152, 252, 255);
-                case StarType.O:
-                    return new Color32(0, 33, 255, 255);
-                default:
-                    return new Color32(255, 255, 255, 255);
-            }         
+                StarType.M => new Color32(237, 30, 30, 255),
+                StarType.K => new Color32(237, 116, 30, 255),
+                StarType.G => new Color32(255, 220, 48, 255),
+                StarType.F => new Color32(255, 255, 255, 255),
+                StarType.A => new Color32(135, 219, 255, 255),
+                StarType.B => new Color32(45, 152, 252, 255),
+                StarType.O => new Color32(0, 33, 255, 255),
+                _ => new Color32(255, 255, 255, 255),
+            };
         }
     }
 

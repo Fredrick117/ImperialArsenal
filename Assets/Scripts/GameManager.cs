@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -12,7 +13,10 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     private GameObject starSystemPrefab;
+    [SerializeField]
+    private GameObject planetPrefab;
 
+    [HideInInspector]
     public StarSystem[] galaxy;
 
     public float borderPadding;
@@ -35,6 +39,29 @@ public class GameManager : MonoBehaviour
         RenderGalaxyView();
     }
 
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // If system view is loaded, render the planets. Otherwise, render the entire galaxy.
+        if (scene.buildIndex == 1)
+        {
+            RenderSystemView();
+        }
+        else 
+        {
+            RenderGalaxyView();
+        }
+    }
+
     private void GenerateStarSystems()
     {
         ShuffleArray(StarSystemNames);
@@ -46,26 +73,40 @@ public class GameManager : MonoBehaviour
             // DANGER: make sure dictionary is always larger than N
             string starName = StarSystemNames[i];
 
-            SpaceObject[] objects = new SpaceObject[numObjects];
+            Planet[] planets = new Planet[numObjects];
+
+            float distanceFromStar = 0.5f;
+            for (int j = 0; j < numObjects; j++)
+            {
+                Vector2 randomPointOnCircle = Random.insideUnitCircle.normalized * distanceFromStar;
+                print(randomPointOnCircle);
+                planets[j] = new Planet(starName + " " + ToRomanNumerals(j + 2), RandomEnumValue<PlanetType>(), randomPointOnCircle.x, randomPointOnCircle.y);
+                distanceFromStar *= 2;
+            }
+
+            Star star = new(starName, Random.Range(0.15f, 0.25f), RandomEnumValue<StarType>());
 
             float xMin = (-Camera.main.orthographicSize * Screen.width / Screen.height) + borderPadding;
             float xMax = (Camera.main.orthographicSize * Screen.width / Screen.height) - borderPadding;
             float yMin = -Camera.main.orthographicSize + borderPadding;
             float yMax = Camera.main.orthographicSize - borderPadding;
 
-            for (int j = 0; j < numObjects - 1; j++)
+            float x = Random.Range(xMin, xMax);
+            float y = Random.Range(yMin, yMax);
+
+            foreach (StarSystem system in galaxy)
             {
-                objects[j] = new Planet(starName + " " + ToRomanNumerals(j + 2), RandomEnumValue<PlanetType>(), Random.Range(25, 325), Random.Range(10, 25));
+                print();
             }
 
-            Star star = new Star(starName, Random.Range(0.15f, 0.25f), RandomEnumValue<StarType>());
-
+            // TODO: need to generate X and Y locations first, but its proximity to other star systems must also be checked. Perhaps for every newly created star system, loop through all other existing star systems, and check the distance between the two points. If the distance is less than desired, try again.
             StarSystem ss = new StarSystem(
                 starName,
-                //Random.Range(xMin, xMax),
-                //Random.Range(yMin, yMax),
-                objects,
-                star
+                planets,
+                star,
+                0,
+                x,
+                y
             );
 
             galaxy[i] = ss;
@@ -74,37 +115,40 @@ public class GameManager : MonoBehaviour
 
     private void RenderGalaxyView()
     {
-        float xMin = (-Camera.main.orthographicSize * Screen.width / Screen.height) + borderPadding;
-        float xMax = (Camera.main.orthographicSize * Screen.width / Screen.height) - borderPadding;
-        float yMin = -Camera.main.orthographicSize + borderPadding;
-        float yMax = Camera.main.orthographicSize - borderPadding;
-
-        foreach (StarSystem ss in galaxy)
+        foreach (StarSystem starSystem in galaxy)
         {
             bool canSpawn = false;
             while (!canSpawn)
             {
-                float x = Random.Range(xMin, xMax);
-                float y = Random.Range(yMin, yMax);
+                //float x = Random.Range(xMin, xMax);
+                //float y = Random.Range(yMin, yMax);
 
-                Collider2D nearbyStarSystems = Physics2D.OverlapCircle(new Vector2(x, y), minDistBetweenSystems, LayerMask.GetMask("StarSystems"));
+                Collider2D nearbyStarSystems = Physics2D.OverlapCircle(new Vector2(starSystem.xLocation, starSystem.yLocation), minDistBetweenSystems, LayerMask.GetMask("StarSystems"));
 
                 if (!nearbyStarSystems)
                 {
                     canSpawn = true;
-                    GameObject starSystemGO = GameObject.Instantiate(starSystemPrefab, new Vector2(x, y), Quaternion.identity);
-                    starSystemGO.GetComponent<StarSystemManager>().systemProperties = ss;
-                    //starSystemGO.GetComponent<SpriteRenderer>().color = ss.Star.Color;
-                    //starSystemGO.transform.localScale = new Vector3(ss.Star.Radius, ss.Star.Radius, ss.Star.Radius);
+                    GameObject starSystemGO = GameObject.Instantiate(starSystemPrefab, new Vector2(starSystem.xLocation, starSystem.yLocation), Quaternion.identity);
+                    starSystemGO.GetComponent<StarSystemManager>().systemProperties = starSystem;
+                    //starSystemGO.GetComponent<SpriteRenderer>().color = starSystem.Star.Color;
+                    //starSystemGO.transform.localScale = new Vector3(starSystem.Star.Radius, starSystem.Star.Radius, starSystem.Star.Radius);
                 }
             }
+        }
+    }
+
+    public void RenderSystemView()
+    {
+        foreach (Planet p in selectedStarSystem.Planets)
+        {
+            GameObject.Instantiate(planetPrefab, new Vector2(p.X, p.Y), Quaternion.identity);
         }
     }
 
     /// <summary>
     /// Selects a random element from an enumeration.
     /// </summary>
-    /// <typeparam name="T">The enum that we wish to select a random element from</typeparam>
+    /// <typeparam name="T">The enum type</typeparam>
     /// <returns>A random value from the declared enumeration</returns>
     private T RandomEnumValue<T>()
     {
