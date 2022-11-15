@@ -14,7 +14,7 @@ public enum StarType
     O
 }
 
-public enum ObjType
+public enum ObjectType
 {
     HabitablePlanet,
     Star,
@@ -30,53 +30,8 @@ public enum PlanetType
     Ocean,
 }
 
-[Flags]
-public enum PersonalityTraits
-{
-    Anxious = 1 << 0,
-    Hostile = 1 << 1,
-    Impulsive = 1 << 2,
-    Fearful = 1 << 3,
-    Kind = 1 << 4,
-    Gregarious = 1 << 5,
-    Cheerful = 1 << 6,
-    Imaginative = 1 << 7,
-    Aesthetic = 1 << 8,
-    Emotional = 1 << 9,
-    Adventurous = 1 << 10,
-    Curious = 1 << 11,
-    Trusting = 1 << 12,
-    Altruistic = 1 << 13,
-    Cooperative = 1 << 14,
-    Modest = 1 << 15,
-    Competent = 1 << 16,
-    Sympathetic = 1 << 17,
-};
-
 [Serializable]
-public class StarSystem
-{
-    [SerializeField]
-    public string Name              { get; set; }
-    public float xLocation          { get; set; }
-    public float yLocation          { get; set; }
-    public Planet[] Planets    { get; set; }
-    public Star Star                { get; set; }
-    public int ControlledBy         { get; set; }
-
-    public StarSystem(string _name, Planet[] _planets, Star _star, int _controlledBy, float _xLocation, float _yLocation)
-    {
-        Name = _name;
-        Planets = _planets;
-        Star = _star;
-        ControlledBy = _controlledBy;
-        xLocation = _xLocation;
-        yLocation = _yLocation;
-    }
-}
-
-[Serializable]
-public class SpaceObject
+public class StellarObject
 {
     public string Name { get; set; }
     public float X { get; set; }
@@ -84,7 +39,7 @@ public class SpaceObject
 }
 
 [Serializable]
-public class Planet : SpaceObject
+public class Planet : StellarObject
 {
     public PlanetType PlanetType;
     public Color32 Color
@@ -113,14 +68,14 @@ public class Planet : SpaceObject
     }
 }
 
-public class Star : SpaceObject
+public class Star : StellarObject
 {
     public StarType Type { get; set; }
     public float Radius { get; set; }
 
-    public Color32 Color 
-    { 
-        get 
+    public Color32 Color
+    {
+        get
         {
             return Type switch
             {

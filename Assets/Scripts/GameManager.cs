@@ -5,23 +5,15 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField]
-    public int numStarSystems;
+    [SerializeField] private GameObject planetPrefab;
 
     public static GameManager Instance;
-    public StarSystem selectedStarSystem;
 
-    [SerializeField]
-    private GameObject starSystemPrefab;
-    [SerializeField]
-    private GameObject planetPrefab;
+    private Planet[] Planets;
 
-    [HideInInspector]
-    public StarSystem[] galaxy;
+    private Star star;
 
-    public float borderPadding;
-
-    public float minDistBetweenSystems;
+    [SerializeField] private const int NUM_PLANETS = 4;
 
     private void Awake()
     {
@@ -33,115 +25,34 @@ public class GameManager : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
-
-        galaxy = new StarSystem[numStarSystems];
-        GenerateStarSystems();
-        RenderGalaxyView();
+        InitializeStarSystem();
+        RenderSystemView();
     }
 
-    private void OnEnable()
-    {
-        SceneManager.sceneLoaded += OnSceneLoaded;
-    }
-
-    private void OnDisable()
-    {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
-    }
-
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        // If system view is loaded, render the planets. Otherwise, render the entire galaxy.
-        if (scene.buildIndex == 1)
-        {
-            RenderSystemView();
-        }
-        else 
-        {
-            RenderGalaxyView();
-        }
-    }
-
-    private void GenerateStarSystems()
+    private void InitializeStarSystem()
     {
         ShuffleArray(StarSystemNames);
+        Planets = new Planet[NUM_PLANETS];
 
-        for (int i = 0; i < numStarSystems; i++)
+        string starName = StarSystemNames[Random.Range(0, StarSystemNames.Length)];
+
+        float distanceFromStar = 0.5f;
+        for (int i = 0; i < NUM_PLANETS; i++)
         {
-            int numObjects = Random.Range(1, 14);
-
-            // DANGER: make sure dictionary is always larger than N
-            string starName = StarSystemNames[i];
-
-            Planet[] planets = new Planet[numObjects];
-
-            float distanceFromStar = 0.5f;
-            for (int j = 0; j < numObjects; j++)
-            {
-                Vector2 randomPointOnCircle = Random.insideUnitCircle.normalized * distanceFromStar;
-                print(randomPointOnCircle);
-                planets[j] = new Planet(starName + " " + ToRomanNumerals(j + 2), RandomEnumValue<PlanetType>(), randomPointOnCircle.x, randomPointOnCircle.y);
-                distanceFromStar *= 2;
-            }
-
-            Star star = new(starName, Random.Range(0.15f, 0.25f), RandomEnumValue<StarType>());
-
-            float xMin = (-Camera.main.orthographicSize * Screen.width / Screen.height) + borderPadding;
-            float xMax = (Camera.main.orthographicSize * Screen.width / Screen.height) - borderPadding;
-            float yMin = -Camera.main.orthographicSize + borderPadding;
-            float yMax = Camera.main.orthographicSize - borderPadding;
-
-            float x = Random.Range(xMin, xMax);
-            float y = Random.Range(yMin, yMax);
-
-            foreach (StarSystem system in galaxy)
-            {
-                print();
-            }
-
-            // TODO: need to generate X and Y locations first, but its proximity to other star systems must also be checked. Perhaps for every newly created star system, loop through all other existing star systems, and check the distance between the two points. If the distance is less than desired, try again.
-            StarSystem ss = new StarSystem(
-                starName,
-                planets,
-                star,
-                0,
-                x,
-                y
-            );
-
-            galaxy[i] = ss;
+            Vector2 randomPointOnCircle = Random.insideUnitCircle.normalized * distanceFromStar;
+            Planets[i] = new Planet(starName + " " + ToRomanNumerals(i + 2), RandomEnumValue<PlanetType>(), randomPointOnCircle.x, randomPointOnCircle.y);
+            distanceFromStar *= 2;
         }
-    }
 
-    private void RenderGalaxyView()
-    {
-        foreach (StarSystem starSystem in galaxy)
-        {
-            bool canSpawn = false;
-            while (!canSpawn)
-            {
-                //float x = Random.Range(xMin, xMax);
-                //float y = Random.Range(yMin, yMax);
-
-                Collider2D nearbyStarSystems = Physics2D.OverlapCircle(new Vector2(starSystem.xLocation, starSystem.yLocation), minDistBetweenSystems, LayerMask.GetMask("StarSystems"));
-
-                if (!nearbyStarSystems)
-                {
-                    canSpawn = true;
-                    GameObject starSystemGO = GameObject.Instantiate(starSystemPrefab, new Vector2(starSystem.xLocation, starSystem.yLocation), Quaternion.identity);
-                    starSystemGO.GetComponent<StarSystemManager>().systemProperties = starSystem;
-                    //starSystemGO.GetComponent<SpriteRenderer>().color = starSystem.Star.Color;
-                    //starSystemGO.transform.localScale = new Vector3(starSystem.Star.Radius, starSystem.Star.Radius, starSystem.Star.Radius);
-                }
-            }
-        }
+        star = new(starName, Random.Range(0.15f, 0.25f), RandomEnumValue<StarType>());
     }
 
     public void RenderSystemView()
     {
-        foreach (Planet p in selectedStarSystem.Planets)
+        foreach (Planet p in Planets)
         {
-            GameObject.Instantiate(planetPrefab, new Vector2(p.X, p.Y), Quaternion.identity);
+            GameObject planet = GameObject.Instantiate(planetPrefab, new Vector2(p.X, p.Y), Quaternion.identity);
+            planet.GetComponent<PlanetManager>().SetPlanetData(p);
         }
     }
 
@@ -201,16 +112,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// A helper method that improves readability by converting the float values of a star system's location into a Vector2 value.
-    /// </summary>
-    /// <param name="i">Iteration value that is used to look up star systems</param>
-    /// <returns>A star system's position in Vector2 format</returns>
-    private Vector2 GetStarSystemVector(int i)
-    {
-        return new Vector2(GameManager.Instance.galaxy[i].Xlocation, GameManager.Instance.galaxy[i].Ylocation);
-    }
-
     // A collection of possible names for star systems.
     private string[] StarSystemNames = new string[] {
         "Ahnar",
@@ -222,13 +123,12 @@ public class GameManager : MonoBehaviour
         "Alhim",
         "Falha",
         "Zamok",
-        "Korolis Ray",
+        "Korolis",
         "Vovio",
         "Ovhil",
         "Cassio",
-        "Urgarius",
         "Irle",
-        "Daryus",
+        "Darius",
         "Demyr",
         "Ionia",
         "Paradis",
