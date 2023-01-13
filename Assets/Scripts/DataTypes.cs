@@ -14,12 +14,6 @@ public enum StarType
     O
 }
 
-public enum ObjectType
-{
-    HabitablePlanet,
-    Star,
-}
-
 public enum PlanetType
 {
     Arctic,
@@ -36,13 +30,17 @@ public class StellarObject
     public string Name { get; set; }
     public float X { get; set; }
     public float Y { get; set; }
+    public float Radius { get; set; }
+    public virtual Color32 Color { get; set; }
 }
 
 [Serializable]
 public class Planet : StellarObject
 {
+    public float DistanceFromStar;
     public PlanetType PlanetType;
-    public Color32 Color
+
+    public override Color32 Color
     {
         get
         {
@@ -59,10 +57,11 @@ public class Planet : StellarObject
         }
     }
 
-    public Planet(string _name, PlanetType _type, float _x, float _y)
+    public Planet(string _name, PlanetType _type, float _distanceFromStar, float _x, float _y)
     {
         Name = _name;
         PlanetType = _type;
+        DistanceFromStar = _distanceFromStar;
         X = _x;
         Y = _y;
     }
@@ -70,10 +69,16 @@ public class Planet : StellarObject
 
 public class Star : StellarObject
 {
-    public StarType Type { get; set; }
-    public float Radius { get; set; }
+    public Star(string _name, float _radius, StarType _type)
+    {
+        Name = _name;
+        Radius = _radius;
+        Type = _type;
+    }
 
-    public Color32 Color
+    public StarType Type { get; set; }
+
+    public override Color32 Color
     {
         get
         {
@@ -90,11 +95,16 @@ public class Star : StellarObject
             };
         }
     }
+}
 
-    public Star(string _name, float _radius, StarType _type)
+public class StarSystem
+{
+    public string systemName { get; set; }
+    public Star systemStar { get; set; }
+    public List<StellarObject> stellarObjects { get; set; }
+
+    public StarSystem(Star star)
     {
-        Name = _name;
-        Radius = _radius;
-        Type = _type;
+        systemStar = star;
     }
 }
